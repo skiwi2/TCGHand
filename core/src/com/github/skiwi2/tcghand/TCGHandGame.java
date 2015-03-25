@@ -25,8 +25,9 @@ public class TCGHandGame extends ApplicationAdapter {
 	private PerspectiveCamera camera;
 
 	private ModelBatch modelBatch;
-	private Model model;
-	private Array<ModelInstance> instances = new Array<ModelInstance>();
+	private Model redModel;
+	private Model blueModel;
+	private Array<ModelInstance> cards = new Array<ModelInstance>();
 
 	private Environment environment;
 
@@ -42,10 +43,13 @@ public class TCGHandGame extends ApplicationAdapter {
 		camera.update();
 
 		modelBatch = new ModelBatch();
-		model = new ModelBuilder().createBox(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH,
+		redModel = new ModelBuilder().createBox(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH,
 			new Material(ColorAttribute.createDiffuse(Color.RED)),
 			Usage.Position | Usage.Normal);
-		instances.add(new ModelInstance(model));
+		blueModel = new ModelBuilder().createBox(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH,
+			new Material(ColorAttribute.createDiffuse(Color.BLUE)),
+			Usage.Position | Usage.Normal);
+		addCard();
 
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
@@ -61,32 +65,37 @@ public class TCGHandGame extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
-			instances.add(new ModelInstance(model));
-			recalculateInstancePositions();
+			addCard();
+			recalculateCardPositions();
 		}
 		else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
-			if (instances.size == 0) {
+			if (cards.size == 0) {
 				return;
 			}
-			instances.removeIndex(instances.size - 1);
-			recalculateInstancePositions();
+			cards.removeIndex(cards.size - 1);
+			recalculateCardPositions();
 		}
 
 		modelBatch.begin(camera);
-		for (ModelInstance instance : instances) {
+		for (ModelInstance instance : cards) {
 			modelBatch.render(instance, environment);
 		}
 		modelBatch.end();
 	}
 
-	private void recalculateInstancePositions() {
-		for (int i = 0; i < instances.size; i++) {
-			ModelInstance instance = instances.get(i);
-			float localX = (((-instances.size / 2f) + i) * (CARD_WIDTH * 1.1f)) + (CARD_WIDTH / 2f);
+	private void recalculateCardPositions() {
+		for (int i = 0; i < cards.size; i++) {
+			ModelInstance instance = cards.get(i);
+			float localX = (((-cards.size / 2f) + i) * (CARD_WIDTH * 1.1f)) + (CARD_WIDTH / 2f);
 			float localZ = i * (CARD_DEPTH / 2f);
 			instance.transform.setToTranslation(localX, 0f, localZ);
 			instance.calculateTransforms();
 		}
+	}
+
+	private void addCard() {
+		Model usedModel = (cards.size % 2 == 0) ? redModel : blueModel;
+		cards.add(new ModelInstance(usedModel));
 	}
 
 	@Override
@@ -94,6 +103,6 @@ public class TCGHandGame extends ApplicationAdapter {
 		super.dispose();
 
 		modelBatch.dispose();
-		model.dispose();
+		redModel.dispose();
 	}
 }
