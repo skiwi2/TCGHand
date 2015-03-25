@@ -21,7 +21,7 @@ import com.badlogic.gdx.utils.Array;
 public class TCGHandGame extends ApplicationAdapter {
 	private static final float CARD_WIDTH = 1f;
 	private static final float CARD_HEIGHT = 1.5f;
-	private static final float CARD_DEPTH = 0.05f;
+	private static final float CARD_DEPTH = 0.01f;
 
 	private PerspectiveCamera camera;
 
@@ -89,7 +89,7 @@ public class TCGHandGame extends ApplicationAdapter {
 		for (int i = 0; i < cards.size; i++) {
 			ModelInstance instance = cards.get(i);
 			float localX = (((-cards.size / 2f) + i) * (CARD_WIDTH * 0.1f)) + (CARD_WIDTH * 0.1f / 2f);
-			float localZ = i * (CARD_DEPTH / 2f);
+			float localZ = i * (CARD_DEPTH * 1.5f);
 			float rotationDegrees = ((-(cards.size - 1) / 2f) + i) * -5f;
 			instance.transform.setToRotation(Vector3.Z, rotationDegrees);
 			instance.transform.setTranslation(localX, 0f, localZ);
