@@ -14,8 +14,12 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 
 public class TCGHandGame extends ApplicationAdapter {
@@ -24,11 +28,12 @@ public class TCGHandGame extends ApplicationAdapter {
 	private static final float CARD_DEPTH = 0.01f;
 
 	private PerspectiveCamera camera;
+	private CameraInputController cameraInputController;
 
 	private ModelBatch modelBatch;
 	private Model redModel;
 	private Model blueModel;
-	private Array<ModelInstance> cards = new Array<ModelInstance>();
+	private Array<ModelInstance> instances = new Array<ModelInstance>();
 
 	private Environment environment;
 
@@ -42,6 +47,8 @@ public class TCGHandGame extends ApplicationAdapter {
 		camera.near = 0.1f;
 		camera.far = 1000f;
 		camera.update();
+		cameraInputController = new CameraInputController(camera);
+		Gdx.input.setInputProcessor(cameraInputController);
 
 		modelBatch = new ModelBatch();
 		redModel = new ModelBuilder().createBox(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH,
@@ -71,35 +78,64 @@ public class TCGHandGame extends ApplicationAdapter {
 			recalculateCardPositions();
 		}
 		else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
-			if (cards.size == 0) {
+			if (instances.size == 0) {
 				return;
 			}
-			cards.removeIndex(cards.size - 1);
+			instances.removeIndex(instances.size - 1);
 			recalculateCardPositions();
 		}
 
-		modelBatch.begin(camera);
-		for (ModelInstance instance : cards) {
-			modelBatch.render(instance, environment);
+		ModelInstance hoveredCard = getIntersectingCard();
+		if (hoveredCard != null) {
+			hoveredCard.transform.translate(0f, CARD_HEIGHT * 0.2f, 0f);
+			hoveredCard.calculateTransforms();
 		}
+
+		modelBatch.begin(camera);
+		modelBatch.render(instances, environment);
 		modelBatch.end();
+
+		if (hoveredCard != null) {
+			hoveredCard.transform.translate(0f, -CARD_HEIGHT * 0.2f, 0f);
+			hoveredCard.calculateTransforms();
+		}
 	}
 
 	private void recalculateCardPositions() {
-		for (int i = 0; i < cards.size; i++) {
-			ModelInstance instance = cards.get(i);
-			float localX = (((-cards.size / 2f) + i) * (CARD_WIDTH * 0.1f)) + (CARD_WIDTH * 0.1f / 2f);
+		for (int i = 0; i < instances.size; i++) {
+			ModelInstance instance = instances.get(i);
+			float localX = (((-instances.size / 2f) + i) * (CARD_WIDTH * 0.1f)) + (CARD_WIDTH * 0.1f / 2f);
 			float localZ = i * (CARD_DEPTH * 1.5f);
-			float rotationDegrees = ((-(cards.size - 1) / 2f) + i) * -5f;
-			instance.transform.setToRotation(Vector3.Z, rotationDegrees);
-			instance.transform.setTranslation(localX, 0f, localZ);
+			float rotationDegrees = ((-(instances.size - 1) / 2f) + i) * -5f;
+			instance.transform.idt();
+			instance.transform.rotate(Vector3.Z, rotationDegrees);
+			instance.transform.translate(localX, 0f, localZ);
 			instance.calculateTransforms();
 		}
 	}
 
 	private void addCard() {
-		Model usedModel = (cards.size % 2 == 0) ? redModel : blueModel;
-		cards.add(new ModelInstance(usedModel));
+		Model usedModel = (instances.size % 2 == 0) ? redModel : blueModel;
+		instances.add(new ModelInstance(usedModel));
+	}
+
+	private ModelInstance getIntersectingCard() {
+		Ray mouseRay = camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
+
+		ModelInstance closestInstance = null;
+		float maxZ = Float.MIN_VALUE;
+		for (ModelInstance instance : instances) {
+			BoundingBox boundingBox = instance.calculateBoundingBox(new BoundingBox()).mul(instance.transform);
+			Vector3 intersection = new Vector3();
+			if (Intersector.intersectRayBounds(mouseRay, boundingBox, intersection)) {
+				if (intersection.z > maxZ) {
+					maxZ = intersection.z;
+					closestInstance = instance;
+				}
+			}
+		}
+
+		return closestInstance;
 	}
 
 	@Override
