@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 public class TCGHandGame extends ApplicationAdapter {
@@ -50,6 +51,7 @@ public class TCGHandGame extends ApplicationAdapter {
 			new Material(ColorAttribute.createDiffuse(Color.BLUE)),
 			Usage.Position | Usage.Normal);
 		addCard();
+		recalculateCardPositions();
 
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
@@ -86,9 +88,11 @@ public class TCGHandGame extends ApplicationAdapter {
 	private void recalculateCardPositions() {
 		for (int i = 0; i < cards.size; i++) {
 			ModelInstance instance = cards.get(i);
-			float localX = (((-cards.size / 2f) + i) * (CARD_WIDTH * 1.1f)) + (CARD_WIDTH / 2f);
+			float localX = (((-cards.size / 2f) + i) * (CARD_WIDTH * 0.1f)) + (CARD_WIDTH * 0.1f / 2f);
 			float localZ = i * (CARD_DEPTH / 2f);
-			instance.transform.setToTranslation(localX, 0f, localZ);
+			float rotationDegrees = ((-(cards.size - 1) / 2f) + i) * -5f;
+			instance.transform.setToRotation(Vector3.Z, rotationDegrees);
+			instance.transform.setTranslation(localX, 0f, localZ);
 			instance.calculateTransforms();
 		}
 	}
