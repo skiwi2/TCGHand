@@ -73,11 +73,11 @@ public class TCGHandGame extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-		if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+		if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT) || Gdx.input.getPitch() >= 5f || Gdx.input.getRoll() >= 5f) {
 			addCard();
 			recalculateCardPositions();
 		}
-		else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+		else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT) || Gdx.input.getPitch() <= -5f || Gdx.input.getRoll() <= -5f) {
 			if (instances.size == 0) {
 				return;
 			}
@@ -123,13 +123,14 @@ public class TCGHandGame extends ApplicationAdapter {
 		Ray mouseRay = camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
 
 		ModelInstance closestInstance = null;
-		float maxZ = Float.MIN_VALUE;
+		float minDistance = Float.MAX_VALUE;
 		for (ModelInstance instance : instances) {
 			BoundingBox boundingBox = instance.calculateBoundingBox(new BoundingBox()).mul(instance.transform);
 			Vector3 intersection = new Vector3();
 			if (Intersector.intersectRayBounds(mouseRay, boundingBox, intersection)) {
-				if (intersection.z > maxZ) {
-					maxZ = intersection.z;
+				float distanceSquared = camera.position.dst2(intersection);
+				if (distanceSquared < minDistance) {
+					minDistance = distanceSquared;
 					closestInstance = instance;
 				}
 			}
