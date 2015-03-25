@@ -29,14 +29,14 @@ public class TCGHandGame extends ApplicationAdapter {
 		super.create();
 
 		camera = new PerspectiveCamera(60f, 800, 600);
-		camera.position.set(0f, 10f, 10f);
+		camera.position.set(0f, 1f, 3f);
 		camera.lookAt(0f, 0f, 0f);
 		camera.near = 0.1f;
 		camera.far = 1000f;
 		camera.update();
 
 		modelBatch = new ModelBatch();
-		model = new ModelBuilder().createBox(1f, 2f, 01f,
+		model = new ModelBuilder().createBox(1f, 1.5f, 0.1f,
 			new Material(ColorAttribute.createDiffuse(Color.RED)),
 			Usage.Position | Usage.Normal);
 		instance = new ModelInstance(model);
