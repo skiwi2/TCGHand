@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -29,6 +31,8 @@ public class TCGHandGame extends ApplicationAdapter {
 
 	private PerspectiveCamera camera;
 	private CameraInputController cameraInputController;
+
+	private Texture cardTexture;
 
 	private ModelBatch modelBatch;
 	private Model redModel;
@@ -50,13 +54,15 @@ public class TCGHandGame extends ApplicationAdapter {
 		cameraInputController = new CameraInputController(camera);
 		Gdx.input.setInputProcessor(cameraInputController);
 
+		cardTexture = new Texture(Gdx.files.internal("Fighter.png"));
+
 		modelBatch = new ModelBatch();
 		redModel = new ModelBuilder().createBox(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH,
-			new Material(ColorAttribute.createDiffuse(Color.RED)),
-			Usage.Position | Usage.Normal);
+			new Material(ColorAttribute.createDiffuse(Color.RED), TextureAttribute.createDiffuse(cardTexture)),
+			Usage.Position | Usage.Normal | Usage.TextureCoordinates);
 		blueModel = new ModelBuilder().createBox(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH,
-			new Material(ColorAttribute.createDiffuse(Color.BLUE)),
-			Usage.Position | Usage.Normal);
+			new Material(ColorAttribute.createDiffuse(Color.BLUE), TextureAttribute.createDiffuse(cardTexture)),
+			Usage.Position | Usage.Normal | Usage.TextureCoordinates);
 		addCard();
 		recalculateCardPositions();
 
@@ -143,7 +149,10 @@ public class TCGHandGame extends ApplicationAdapter {
 	public void dispose() {
 		super.dispose();
 
+		cardTexture.dispose();
+
 		modelBatch.dispose();
 		redModel.dispose();
+		blueModel.dispose();
 	}
 }
