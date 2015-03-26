@@ -42,7 +42,7 @@ public class TCGHandGame extends ApplicationAdapter {
 	private Environment environment;
 
 	@Override
-	public void create () {
+	public void create() {
 		super.create();
 
 		camera = new PerspectiveCamera(60f, 800, 600);
@@ -72,7 +72,7 @@ public class TCGHandGame extends ApplicationAdapter {
 	}
 
 	@Override
-	public void render () {
+	public void render() {
 		super.render();
 
 		Gdx.gl.glClearColor(0.2f, 0f, 0f, 1f);
