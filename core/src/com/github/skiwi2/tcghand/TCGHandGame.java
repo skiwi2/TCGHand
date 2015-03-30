@@ -48,6 +48,8 @@ public class TCGHandGame extends ApplicationAdapter {
 	private Array<ModelInstance> handInstances = new Array<ModelInstance>();
 	private Array<ModelInstance> deckInstances = new Array<ModelInstance>();
 
+	private Deck deck;
+
 	private Environment environment;
 
 	@Override
@@ -86,6 +88,12 @@ public class TCGHandGame extends ApplicationAdapter {
 			addCardToDeck();
 		}
 		recalculateDeckPositions();
+
+		deck = new Deck();
+		for (int i = 0; i < 60; i++) {
+			deck.addCard(cardTexture);
+		}
+		deck.transform.translate(-3f, 0f, 2f);
 	}
 
 	@Override
@@ -119,6 +127,7 @@ public class TCGHandGame extends ApplicationAdapter {
 		modelBatch.begin(camera);
 		modelBatch.render(handInstances, environment);
 		modelBatch.render(deckInstances, environment);
+		modelBatch.render(deck, environment);
 		modelBatch.end();
 
 		if (hoveredCard != null) {
@@ -213,6 +222,8 @@ public class TCGHandGame extends ApplicationAdapter {
 		modelBatch.dispose();
 		redModel.dispose();
 		blueModel.dispose();
+
+		deck.dispose();
 	}
 
 	private static class ModelInstanceAccessor implements TweenAccessor<ModelInstance> {
