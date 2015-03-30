@@ -37,7 +37,8 @@ public class TCGHandGame extends ApplicationAdapter {
 	private ModelBatch modelBatch;
 	private Model redModel;
 	private Model blueModel;
-	private Array<ModelInstance> instances = new Array<ModelInstance>();
+	private Array<ModelInstance> handInstances = new Array<ModelInstance>();
+	private Array<ModelInstance> deckInstances = new Array<ModelInstance>();
 
 	private Environment environment;
 
@@ -63,12 +64,17 @@ public class TCGHandGame extends ApplicationAdapter {
 		blueModel = new ModelBuilder().createBox(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH,
 			new Material(ColorAttribute.createDiffuse(Color.BLUE), TextureAttribute.createDiffuse(cardTexture)),
 			Usage.Position | Usage.Normal | Usage.TextureCoordinates);
-		addCard();
+		addCardToHand();
 		recalculateCardPositions();
 
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+
+		for (int i = 0; i < 60; i++) {
+			addCardToDeck();
+		}
+		recalculateDeckPositions();
 	}
 
 	@Override
@@ -80,14 +86,14 @@ public class TCGHandGame extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT) || Gdx.input.getPitch() >= 5f || Gdx.input.getRoll() >= 5f) {
-			addCard();
+			addCardToHand();
 			recalculateCardPositions();
 		}
 		else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT) || Gdx.input.getPitch() <= -5f || Gdx.input.getRoll() <= -5f) {
-			if (instances.size == 0) {
+			if (handInstances.size == 0) {
 				return;
 			}
-			instances.removeIndex(instances.size - 1);
+			handInstances.removeIndex(handInstances.size - 1);
 			recalculateCardPositions();
 		}
 
@@ -98,7 +104,8 @@ public class TCGHandGame extends ApplicationAdapter {
 		}
 
 		modelBatch.begin(camera);
-		modelBatch.render(instances, environment);
+		modelBatch.render(handInstances, environment);
+		modelBatch.render(deckInstances, environment);
 		modelBatch.end();
 
 		if (hoveredCard != null) {
@@ -108,11 +115,11 @@ public class TCGHandGame extends ApplicationAdapter {
 	}
 
 	private void recalculateCardPositions() {
-		for (int i = 0; i < instances.size; i++) {
-			ModelInstance instance = instances.get(i);
-			float localX = (((-instances.size / 2f) + i) * (CARD_WIDTH * 0.1f)) + (CARD_WIDTH * 0.1f / 2f);
+		for (int i = 0; i < handInstances.size; i++) {
+			ModelInstance instance = handInstances.get(i);
+			float localX = (((-handInstances.size / 2f) + i) * (CARD_WIDTH * 0.1f)) + (CARD_WIDTH * 0.1f / 2f);
 			float localZ = i * (CARD_DEPTH * 1.5f);
-			float rotationDegrees = ((-(instances.size - 1) / 2f) + i) * -5f;
+			float rotationDegrees = ((-(handInstances.size - 1) / 2f) + i) * -5f;
 			instance.transform.idt();
 			instance.transform.rotate(Vector3.Z, rotationDegrees);
 			instance.transform.translate(localX, 0f, localZ);
@@ -120,9 +127,28 @@ public class TCGHandGame extends ApplicationAdapter {
 		}
 	}
 
-	private void addCard() {
-		Model usedModel = (instances.size % 2 == 0) ? redModel : blueModel;
-		instances.add(new ModelInstance(usedModel));
+	private void recalculateDeckPositions() {
+		for (int i = 0; i < deckInstances.size; i++) {
+			ModelInstance instance = deckInstances.get(i);
+			float localX = 3f;
+			float localY = i * CARD_DEPTH;
+			float localZ = -2f;
+			instance.transform.idt();
+			instance.transform.translate(localX, localY, localZ);
+			instance.transform.rotate(Vector3.X, 90f);
+			instance.transform.rotate(Vector3.Z, 180f);
+			instance.calculateTransforms();
+		}
+	}
+
+	private void addCardToHand() {
+		Model usedModel = (handInstances.size % 2 == 0) ? redModel : blueModel;
+		handInstances.add(new ModelInstance(usedModel));
+	}
+
+	private void addCardToDeck() {
+		Model usedModel = (deckInstances.size % 2 == 0) ? redModel : blueModel;
+		deckInstances.add(new ModelInstance(usedModel));
 	}
 
 	private ModelInstance getIntersectingCard() {
@@ -130,7 +156,7 @@ public class TCGHandGame extends ApplicationAdapter {
 
 		ModelInstance closestInstance = null;
 		float minDistance = Float.MAX_VALUE;
-		for (ModelInstance instance : instances) {
+		for (ModelInstance instance : handInstances) {
 			BoundingBox boundingBox = instance.calculateBoundingBox(new BoundingBox()).mul(instance.transform);
 			Vector3 intersection = new Vector3();
 			if (Intersector.intersectRayBounds(mouseRay, boundingBox, intersection)) {
