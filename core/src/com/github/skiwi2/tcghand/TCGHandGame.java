@@ -1,5 +1,10 @@
 package com.github.skiwi2.tcghand;
 
+import aurelienribon.tweenengine.Timeline;
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenAccessor;
+import aurelienribon.tweenengine.TweenManager;
+import aurelienribon.tweenengine.equations.Linear;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -19,6 +24,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
@@ -28,6 +34,8 @@ public class TCGHandGame extends ApplicationAdapter {
 	private static final float CARD_WIDTH = 1f;
 	private static final float CARD_HEIGHT = 1.5f;
 	private static final float CARD_DEPTH = 0.01f;
+
+	private TweenManager tweenManager;
 
 	private PerspectiveCamera camera;
 	private CameraInputController cameraInputController;
@@ -45,6 +53,9 @@ public class TCGHandGame extends ApplicationAdapter {
 	@Override
 	public void create() {
 		super.create();
+
+		Tween.registerAccessor(ModelInstance.class, new ModelInstanceAccessor());
+		tweenManager = new TweenManager();
 
 		camera = new PerspectiveCamera(60f, 800, 600);
 		camera.position.set(0f, 1f, 3f);
@@ -103,6 +114,8 @@ public class TCGHandGame extends ApplicationAdapter {
 			hoveredCard.calculateTransforms();
 		}
 
+		tweenManager.update(Gdx.graphics.getDeltaTime());
+
 		modelBatch.begin(camera);
 		modelBatch.render(handInstances, environment);
 		modelBatch.render(deckInstances, environment);
@@ -148,7 +161,27 @@ public class TCGHandGame extends ApplicationAdapter {
 
 	private void addCardToDeck() {
 		Model usedModel = (deckInstances.size % 2 == 0) ? redModel : blueModel;
-		deckInstances.add(new ModelInstance(usedModel));
+		ModelInstance instance = new ModelInstance(usedModel);
+		deckInstances.add(instance);
+
+		Timeline timeline = Timeline.createParallel()
+			.beginSequence()
+			.push(Tween.to(instance, ModelInstanceAccessor.POSITION, 1f)
+				.targetRelative(0f, 0f, -1f))
+			.push(Tween.to(instance, ModelInstanceAccessor.POSITION, 1f)
+				.targetRelative(0f, 1f, 0f))
+			.push(Tween.to(instance, ModelInstanceAccessor.POSITION, 1f)
+				.targetRelative(0f, 0f, 1f))
+			.push(Tween.to(instance, ModelInstanceAccessor.POSITION, 1f)
+				.targetRelative(0f, -1f, 0f))
+			.end()
+			.beginSequence()
+			.push(Tween.to(instance, ModelInstanceAccessor.ROTATION_Y, 4f)
+				.targetRelative(720f)
+				.ease(Linear.INOUT))
+			.end()
+			.repeat(Tween.INFINITY, 0f);
+		timeline.start(tweenManager);
 	}
 
 	private ModelInstance getIntersectingCard() {
@@ -180,5 +213,78 @@ public class TCGHandGame extends ApplicationAdapter {
 		modelBatch.dispose();
 		redModel.dispose();
 		blueModel.dispose();
+	}
+
+	private static class ModelInstanceAccessor implements TweenAccessor<ModelInstance> {
+		private static final int POSITION = 1;
+		private static final int ROTATION_X = 2;
+		private static final int ROTATION_Y = 3;
+		private static final int ROTATION_Z = 4;
+
+		private Quaternion quaternionX;
+		private Quaternion quaternionY;
+		private Quaternion quaternionZ;
+
+		@Override
+		public int getValues(final ModelInstance target, final int tweenType, final float[] returnValues) {
+			switch (tweenType) {
+				case POSITION:
+					Vector3 position = target.transform.getTranslation(new Vector3());
+					returnValues[0] = position.x;
+					returnValues[1] = position.y;
+					returnValues[2] = position.z;
+					return 3;
+				case ROTATION_X:
+					quaternionX = target.transform.getRotation(new Quaternion(), true);
+					returnValues[0] = quaternionX.getAngleAround(Vector3.X);
+					return 1;
+				case ROTATION_Y:
+					quaternionY = target.transform.getRotation(new Quaternion(), true);
+					returnValues[0] = quaternionY.getAngleAround(Vector3.Y);
+					return 1;
+				case ROTATION_Z:
+					quaternionZ = target.transform.getRotation(new Quaternion(), true);
+					returnValues[0] = quaternionZ.getAngleAround(Vector3.Z);
+					return 1;
+				default:
+					throw new IllegalArgumentException("Unknown tweenType: " + tweenType);
+			}
+		}
+
+		@Override
+		public void setValues(final ModelInstance target, final int tweenType, final float[] newValues) {
+			switch (tweenType) {
+				case POSITION:
+					target.transform.setTranslation(newValues[0], newValues[1], newValues[2]);
+					target.calculateTransforms();
+					break;
+				case ROTATION_X:
+					Vector3 positionX = target.transform.getTranslation(new Vector3());
+					target.transform.idt();
+					target.transform.translate(positionX.x, positionX.y, positionX.z);
+					target.transform.rotate(Vector3.X, newValues[0]);
+					target.transform.rotate(quaternionX);
+					target.calculateTransforms();
+					break;
+				case ROTATION_Y:
+					Vector3 positionY = target.transform.getTranslation(new Vector3());
+					target.transform.idt();
+					target.transform.translate(positionY.x, positionY.y, positionY.z);
+					target.transform.rotate(Vector3.Y, newValues[0]);
+					target.transform.rotate(quaternionY);
+					target.calculateTransforms();
+					break;
+				case ROTATION_Z:
+					Vector3 positionZ = target.transform.getTranslation(new Vector3());
+					target.transform.idt();
+					target.transform.translate(positionZ.x, positionZ.y, positionZ.z);
+					target.transform.rotate(Vector3.Z, newValues[0]);
+					target.transform.rotate(quaternionZ);
+					target.calculateTransforms();
+					break;
+				default:
+					throw new IllegalArgumentException("Unknown tweenType: " + tweenType);
+			}
+		}
 	}
 }

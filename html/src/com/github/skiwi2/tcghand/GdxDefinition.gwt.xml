@@ -5,6 +5,8 @@
 
 	<inherits name='TCGHandGame' />
 	<entry-point class='com.github.skiwi2.tcghand.client.HtmlLauncher' />
+
+	<inherits name='aurelienribon.tweenengine'/>
 	
 	<set-configuration-property name="gdx.assetpath" value="../android/assets" />
 </module>

@@ -4,6 +4,8 @@
 	<inherits name='com.badlogic.gdx.backends.gdx_backends_gwt' />
 
     <inherits name='com.github.skiwi2.tcghand.GdxDefinition' />
+
+	<inherits name='aurelienribon.tweenengine'/>
     
     <collapse-all-properties />
     
