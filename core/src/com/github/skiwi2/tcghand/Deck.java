@@ -1,5 +1,6 @@
 package com.github.skiwi2.tcghand;
 
+import aurelienribon.tweenengine.TweenManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -26,7 +27,8 @@ public class Deck extends RenderableObject {
 
     private final Array<Disposable> usedDisposables = new Array<Disposable>();
 
-    public Deck() {
+    public Deck(final TweenManager tweenManager) {
+        super(tweenManager);
         addExtraTransform(deckTransform);
     }
 

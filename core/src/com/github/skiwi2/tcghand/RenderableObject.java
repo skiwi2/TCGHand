@@ -1,5 +1,6 @@
 package com.github.skiwi2.tcghand;
 
+import aurelienribon.tweenengine.TweenManager;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -17,6 +18,12 @@ public abstract class RenderableObject implements RenderableProvider, Disposable
     protected final Array<ModelInstance> instances = new Array<ModelInstance>();
 
     private final Array<Matrix4> extraTransforms = new Array<Matrix4>();
+
+    protected final TweenManager tweenManager;
+
+    public RenderableObject(final TweenManager tweenManager) {
+        this.tweenManager = tweenManager;
+    }
 
     public void addExtraTransform(final Matrix4 extraTransform) {
         this.extraTransforms.add(extraTransform);

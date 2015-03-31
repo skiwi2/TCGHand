@@ -57,13 +57,13 @@ public class TCGHandGame extends ApplicationAdapter {
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
-		deck = new Deck();
+		deck = new Deck(tweenManager);
 		for (int i = 0; i < 60; i++) {
 			deck.addCard(cardTexture);
 		}
 		deck.transform.translate(3f, 0f, -2f);
 
-		hand = new Hand();
+		hand = new Hand(tweenManager);
 
 		renderableObjects.addAll(deck, hand);
 	}
