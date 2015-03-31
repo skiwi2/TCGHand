@@ -9,10 +9,10 @@ import com.badlogic.gdx.math.Vector3;
  * @author Frank van Heeswijk
  */
 public class ModelInstanceAccessor implements TweenAccessor<ModelInstance> {
-    private static final int POSITION = 1;
-    private static final int ROTATION_X = 2;
-    private static final int ROTATION_Y = 3;
-    private static final int ROTATION_Z = 4;
+    public static final int POSITION = 1;
+    public static final int ROTATION_X = 2;
+    public static final int ROTATION_Y = 3;
+    public static final int ROTATION_Z = 4;
 
     private Quaternion quaternionX;
     private Quaternion quaternionY;
