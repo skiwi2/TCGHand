@@ -49,6 +49,7 @@ public class TCGHandGame extends ApplicationAdapter {
 	private Array<ModelInstance> deckInstances = new Array<ModelInstance>();
 
 	private Deck deck;
+	private Hand hand;
 
 	private Environment environment;
 
@@ -94,6 +95,9 @@ public class TCGHandGame extends ApplicationAdapter {
 			deck.addCard(cardTexture);
 		}
 		deck.transform.translate(-3f, 0f, 2f);
+
+		hand = new Hand();
+		hand.transform.translate(0f, 0f, -1f);
 	}
 
 	@Override
@@ -105,6 +109,7 @@ public class TCGHandGame extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT) || Gdx.input.getPitch() >= 5f || Gdx.input.getRoll() >= 5f) {
+			hand.addCard(deck.drawCard());
 			addCardToHand();
 			recalculateCardPositions();
 		}
@@ -112,6 +117,7 @@ public class TCGHandGame extends ApplicationAdapter {
 			if (handInstances.size == 0) {
 				return;
 			}
+			hand.destroyLastCard();
 			handInstances.removeIndex(handInstances.size - 1);
 			recalculateCardPositions();
 		}
@@ -128,6 +134,7 @@ public class TCGHandGame extends ApplicationAdapter {
 		modelBatch.render(handInstances, environment);
 		modelBatch.render(deckInstances, environment);
 		modelBatch.render(deck, environment);
+		modelBatch.render(hand, environment);
 		modelBatch.end();
 
 		if (hoveredCard != null) {
@@ -224,6 +231,7 @@ public class TCGHandGame extends ApplicationAdapter {
 		blueModel.dispose();
 
 		deck.dispose();
+		hand.dispose();
 	}
 
 	private static class ModelInstanceAccessor implements TweenAccessor<ModelInstance> {
