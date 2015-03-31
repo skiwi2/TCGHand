@@ -1,33 +1,19 @@
 package com.github.skiwi2.tcghand;
 
-import aurelienribon.tweenengine.Timeline;
 import aurelienribon.tweenengine.Tween;
-import aurelienribon.tweenengine.TweenAccessor;
 import aurelienribon.tweenengine.TweenManager;
-import aurelienribon.tweenengine.equations.Linear;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 
 public class TCGHandGame extends ApplicationAdapter {
@@ -151,79 +137,6 @@ public class TCGHandGame extends ApplicationAdapter {
 
 		for (RenderableObject renderableObject : renderableObjects) {
 			renderableObject.dispose();
-		}
-	}
-
-	private static class ModelInstanceAccessor implements TweenAccessor<ModelInstance> {
-		private static final int POSITION = 1;
-		private static final int ROTATION_X = 2;
-		private static final int ROTATION_Y = 3;
-		private static final int ROTATION_Z = 4;
-
-		private Quaternion quaternionX;
-		private Quaternion quaternionY;
-		private Quaternion quaternionZ;
-
-		@Override
-		public int getValues(final ModelInstance target, final int tweenType, final float[] returnValues) {
-			switch (tweenType) {
-				case POSITION:
-					Vector3 position = target.transform.getTranslation(new Vector3());
-					returnValues[0] = position.x;
-					returnValues[1] = position.y;
-					returnValues[2] = position.z;
-					return 3;
-				case ROTATION_X:
-					quaternionX = target.transform.getRotation(new Quaternion(), true);
-					returnValues[0] = quaternionX.getAngleAround(Vector3.X);
-					return 1;
-				case ROTATION_Y:
-					quaternionY = target.transform.getRotation(new Quaternion(), true);
-					returnValues[0] = quaternionY.getAngleAround(Vector3.Y);
-					return 1;
-				case ROTATION_Z:
-					quaternionZ = target.transform.getRotation(new Quaternion(), true);
-					returnValues[0] = quaternionZ.getAngleAround(Vector3.Z);
-					return 1;
-				default:
-					throw new IllegalArgumentException("Unknown tweenType: " + tweenType);
-			}
-		}
-
-		@Override
-		public void setValues(final ModelInstance target, final int tweenType, final float[] newValues) {
-			switch (tweenType) {
-				case POSITION:
-					target.transform.setTranslation(newValues[0], newValues[1], newValues[2]);
-					target.calculateTransforms();
-					break;
-				case ROTATION_X:
-					Vector3 positionX = target.transform.getTranslation(new Vector3());
-					target.transform.idt();
-					target.transform.translate(positionX.x, positionX.y, positionX.z);
-					target.transform.rotate(Vector3.X, newValues[0]);
-					target.transform.rotate(quaternionX);
-					target.calculateTransforms();
-					break;
-				case ROTATION_Y:
-					Vector3 positionY = target.transform.getTranslation(new Vector3());
-					target.transform.idt();
-					target.transform.translate(positionY.x, positionY.y, positionY.z);
-					target.transform.rotate(Vector3.Y, newValues[0]);
-					target.transform.rotate(quaternionY);
-					target.calculateTransforms();
-					break;
-				case ROTATION_Z:
-					Vector3 positionZ = target.transform.getTranslation(new Vector3());
-					target.transform.idt();
-					target.transform.translate(positionZ.x, positionZ.y, positionZ.z);
-					target.transform.rotate(Vector3.Z, newValues[0]);
-					target.transform.rotate(quaternionZ);
-					target.calculateTransforms();
-					break;
-				default:
-					throw new IllegalArgumentException("Unknown tweenType: " + tweenType);
-			}
 		}
 	}
 }
