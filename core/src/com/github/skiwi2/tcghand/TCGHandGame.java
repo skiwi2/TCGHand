@@ -40,6 +40,8 @@ public class TCGHandGame extends ApplicationAdapter {
 
 	private ModelBatch modelBatch;
 
+	private final Array<RenderableObject> renderableObjects = new Array<RenderableObject>();
+
 	private Deck deck;
 	private Hand hand;
 
@@ -76,6 +78,8 @@ public class TCGHandGame extends ApplicationAdapter {
 		deck.transform.translate(3f, 0f, -2f);
 
 		hand = new Hand();
+
+		renderableObjects.addAll(deck, hand);
 	}
 
 	@Override
@@ -108,8 +112,7 @@ public class TCGHandGame extends ApplicationAdapter {
 		tweenManager.update(Gdx.graphics.getDeltaTime());
 
 		modelBatch.begin(camera);
-		modelBatch.render(deck, environment);
-		modelBatch.render(hand, environment);
+		modelBatch.render(renderableObjects, environment);
 		modelBatch.end();
 
 //		if (hoveredCard != null) {
@@ -146,8 +149,9 @@ public class TCGHandGame extends ApplicationAdapter {
 
 		modelBatch.dispose();
 
-		deck.dispose();
-		hand.dispose();
+		for (RenderableObject renderableObject : renderableObjects) {
+			renderableObject.dispose();
+		}
 	}
 
 	private static class ModelInstanceAccessor implements TweenAccessor<ModelInstance> {
