@@ -20,9 +20,11 @@ public abstract class RenderableObject implements RenderableProvider, Disposable
     private final Array<Matrix4> extraTransforms = new Array<Matrix4>();
 
     protected final TweenManager tweenManager;
+    protected final TransitioningZone transitioningZone;
 
-    public RenderableObject(final TweenManager tweenManager) {
+    public RenderableObject(final TweenManager tweenManager, final TransitioningZone transitioningZone) {
         this.tweenManager = tweenManager;
+        this.transitioningZone = transitioningZone;
     }
 
     public void addExtraTransform(final Matrix4 extraTransform) {

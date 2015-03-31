@@ -27,8 +27,8 @@ public class Deck extends RenderableObject {
 
     private final Array<Disposable> usedDisposables = new Array<Disposable>();
 
-    public Deck(final TweenManager tweenManager) {
-        super(tweenManager);
+    public Deck(final TweenManager tweenManager, final TransitioningZone transitioningZone) {
+        super(tweenManager, transitioningZone);
         addExtraTransform(deckTransform);
     }
 
@@ -46,7 +46,10 @@ public class Deck extends RenderableObject {
     }
 
     public ModelInstance drawCard() {
-        return instances.removeIndex(instances.size - 1);
+        ModelInstance instance = instances.removeIndex(instances.size - 1);
+        instance.transform.mulLeft(transform);
+        transitioningZone.addCard(instance);
+        return instance;
     }
 
     @Override

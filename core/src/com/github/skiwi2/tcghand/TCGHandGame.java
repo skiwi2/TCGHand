@@ -28,6 +28,7 @@ public class TCGHandGame extends ApplicationAdapter {
 
 	private final Array<RenderableObject> renderableObjects = new Array<RenderableObject>();
 
+	private TransitioningZone transitioningZone;
 	private Deck deck;
 	private Hand hand;
 
@@ -57,15 +58,17 @@ public class TCGHandGame extends ApplicationAdapter {
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
-		deck = new Deck(tweenManager);
+		transitioningZone = new TransitioningZone(tweenManager);
+
+		deck = new Deck(tweenManager, transitioningZone);
 		for (int i = 0; i < 60; i++) {
 			deck.addCard(cardTexture);
 		}
 		deck.transform.translate(3f, 0f, -2f);
 
-		hand = new Hand(tweenManager);
+		hand = new Hand(tweenManager, transitioningZone);
 
-		renderableObjects.addAll(deck, hand);
+		renderableObjects.addAll(transitioningZone, deck, hand);
 	}
 
 	@Override

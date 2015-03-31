@@ -1,7 +1,9 @@
 package com.github.skiwi2.tcghand;
 
+import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Timeline;
 import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.TweenManager;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
@@ -16,16 +18,13 @@ public class Hand extends RenderableObject {
     private static final float CARD_HEIGHT = 1.5f;
     private static final float CARD_DEPTH = 0.01f;
 
-    public Hand(final TweenManager tweenManager) {
-        super(tweenManager);
+    public Hand(final TweenManager tweenManager, final TransitioningZone transitioningZone) {
+        super(tweenManager, transitioningZone);
     }
 
     //TODO use CardData instead of ModelInstance and recreate the card using that
     public void addCard(final ModelInstance cardInstance) {
-        instances.add(cardInstance);
-//        calculateCardTransforms();
-
-        Matrix4 targetTransform = getTargetTransform();
+        Matrix4 targetTransform = getTargetTransform().mulLeft(transform);
         Vector3 targetVector = targetTransform.getTranslation(new Vector3());
         float targetAngle = targetTransform.getRotation(new Quaternion(), true).getAngleAround(Vector3.Z);
 
@@ -45,6 +44,13 @@ public class Hand extends RenderableObject {
                 .push(Tween.to(cardInstance, ModelInstanceAccessor.POSITION, 0.5f)
                     .target(targetVector.x, targetVector.y, targetVector.z))
             .end()
+            .push(Tween.call(new TweenCallback() {
+                @Override
+                public void onEvent(final int type, final BaseTween<?> source) {
+                    transitioningZone.removeCard(cardInstance);
+                    instances.add(cardInstance);
+                }
+            }))
         .end();
 
         timeline.start(tweenManager);
