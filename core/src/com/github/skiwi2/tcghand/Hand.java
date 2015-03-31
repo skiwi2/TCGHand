@@ -19,6 +19,7 @@ public class Hand extends RenderableObject {
 
     public void destroyLastCard() {
         instances.removeIndex(instances.size - 1);
+        calculateCardTransforms();
     }
 
     private void calculateCardTransforms() {
