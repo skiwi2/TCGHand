@@ -31,6 +31,10 @@ public class Hand implements RenderableProvider, Disposable {
         cardInstances.removeIndex(cardInstances.size - 1);
     }
 
+    public boolean isEmpty() {
+        return (cardInstances.size == 0);
+    }
+
     private void calculateCardTransforms() {
         for (int i = 0; i < cardInstances.size; i++) {
             ModelInstance cardInstance = cardInstances.get(i);

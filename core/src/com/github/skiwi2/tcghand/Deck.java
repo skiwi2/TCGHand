@@ -49,6 +49,10 @@ public class Deck implements RenderableProvider, Disposable {
         return cardInstances.removeIndex(cardInstances.size - 1);
     }
 
+    public boolean isEmpty() {
+        return (cardInstances.size == 0);
+    }
+
     @Override
     public void getRenderables(final Array<Renderable> renderables, final Pool<Renderable> pool) {
         for (ModelInstance cardInstance : cardInstances) {
