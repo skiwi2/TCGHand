@@ -35,7 +35,7 @@ public class Hand extends RenderableObject {
         }
         timeline.beginSequence()
             .push(Tween.to(cardInstance, ModelInstanceAccessor.POSITION, 0.5f)
-                .targetRelative(0f, 0f, cardInstance.transform.getTranslation(new Vector3()).z - transform.getTranslation(new Vector3()).z))
+                .targetRelative(0f, 0f, transform.getTranslation(new Vector3()).z - cardInstance.transform.getTranslation(new Vector3()).z))
             .beginParallel()
                 .push(Tween.to(cardInstance, ModelInstanceAccessor.ROTATION_Z, 0.5f)
                     .targetRelative(180f))
