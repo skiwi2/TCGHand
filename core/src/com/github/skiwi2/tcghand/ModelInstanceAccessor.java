@@ -1,14 +1,15 @@
 package com.github.skiwi2.tcghand;
 
-import aurelienribon.tweenengine.TweenAccessor;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
+import java.util.Arrays;
+
 /**
  * @author Frank van Heeswijk
  */
-public class ModelInstanceAccessor implements TweenAccessor<ModelInstance> {
+public class ModelInstanceAccessor extends TweenDeltaAccessor<ModelInstance> {
     public static final int POSITION = 1;
     public static final int ROTATION_X = 2;
     public static final int ROTATION_Y = 3;
@@ -19,7 +20,7 @@ public class ModelInstanceAccessor implements TweenAccessor<ModelInstance> {
     private Quaternion quaternionZ;
 
     @Override
-    public int getValues(final ModelInstance target, final int tweenType, final float[] returnValues) {
+    public int getValuesInternal(final ModelInstance target, final int tweenType, final float[] returnValues) {
         switch (tweenType) {
             case POSITION:
                 Vector3 position = target.transform.getTranslation(new Vector3());
@@ -45,34 +46,38 @@ public class ModelInstanceAccessor implements TweenAccessor<ModelInstance> {
     }
 
     @Override
-    public void setValues(final ModelInstance target, final int tweenType, final float[] newValues) {
+    public void updateValues(final ModelInstance target, final int tweenType, final float[] deltaValues) {
         switch (tweenType) {
             case POSITION:
-                target.transform.setTranslation(newValues[0], newValues[1], newValues[2]);
+                target.transform.translate(deltaValues[0], deltaValues[1], deltaValues[2]);
                 target.calculateTransforms();
                 break;
             case ROTATION_X:
                 Vector3 positionX = target.transform.getTranslation(new Vector3());
+                //TODO scale is not stored?
                 target.transform.idt();
                 target.transform.translate(positionX.x, positionX.y, positionX.z);
-                target.transform.rotate(Vector3.X, newValues[0]);
+                target.transform.rotate(Vector3.X, deltaValues[0]);
                 target.transform.rotate(quaternionX);
                 target.calculateTransforms();
                 break;
             case ROTATION_Y:
                 Vector3 positionY = target.transform.getTranslation(new Vector3());
+                //TODO scale is not stored?
                 target.transform.idt();
                 target.transform.translate(positionY.x, positionY.y, positionY.z);
-                target.transform.rotate(Vector3.Y, newValues[0]);
+                target.transform.rotate(Vector3.Y, deltaValues[0]);
                 target.transform.rotate(quaternionY);
                 target.calculateTransforms();
                 break;
             case ROTATION_Z:
                 Vector3 positionZ = target.transform.getTranslation(new Vector3());
-                target.transform.idt();
+//                target.transform.idt();
                 target.transform.translate(positionZ.x, positionZ.y, positionZ.z);
-                target.transform.rotate(Vector3.Z, newValues[0]);
-                target.transform.rotate(quaternionZ);
+                target.transform.rotate(Vector3.Z, deltaValues[0]);
+                target.transform.translate(-positionZ.x, -positionZ.y, -positionZ.z);
+                //TODO fix this, only apply relative rotation in the end
+//                target.transform.rotate(quaternionZ);
                 target.calculateTransforms();
                 break;
             default:

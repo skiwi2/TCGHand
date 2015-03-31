@@ -30,19 +30,20 @@ public class Hand extends RenderableObject {
 
         Timeline timeline = Timeline.createParallel();
         for (ModelInstance instance : instances) {
-            timeline.push(Tween.to(instance, ModelInstanceAccessor.ROTATION_Z, 1f)
-                .targetRelative(5f));
+//            timeline.push(Tween.to(instance, ModelInstanceAccessor.ROTATION_Z, 1f)
+//                .targetRelative(5f));
         }
         timeline.beginSequence()
             .push(Tween.to(cardInstance, ModelInstanceAccessor.POSITION, 0.5f)
-                .targetRelative(0f, 0f, transform.getTranslation(new Vector3()).z - cardInstance.transform.getTranslation(new Vector3()).z))
+                //TODO should be (0, 0, alpha) instead of (0, -alpha, 0)? only because deck is by default rotated
+                .targetRelative(0f, -(transform.getTranslation(new Vector3()).z - cardInstance.transform.getTranslation(new Vector3()).z), 0f))
             .beginParallel()
                 .push(Tween.to(cardInstance, ModelInstanceAccessor.ROTATION_Z, 0.5f)
                     .targetRelative(180f))
-                .push(Tween.to(cardInstance, ModelInstanceAccessor.ROTATION_X, 0.5f)
-                    .targetRelative(90f - targetAngle))
-                .push(Tween.to(cardInstance, ModelInstanceAccessor.POSITION, 0.5f)
-                    .target(targetVector.x, targetVector.y, targetVector.z))
+//                .push(Tween.to(cardInstance, ModelInstanceAccessor.ROTATION_X, 0.5f)
+//                    .targetRelative(90f - targetAngle))
+//                .push(Tween.to(cardInstance, ModelInstanceAccessor.POSITION, 0.5f)
+//                    .target(targetVector.x, targetVector.y, targetVector.z))
             .end()
             .push(Tween.call(new TweenCallback() {
                 @Override

@@ -17,7 +17,10 @@ import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.utils.Array;
 
 public class TCGHandGame extends ApplicationAdapter {
+	public static final int TWEEN_COMBINED_ATTRIBUTES_LIMIT = 3;
+
 	private TweenManager tweenManager;
+	private TweenDeltaAccessor<ModelInstance> tweenDeltaAccessor;
 
 	private PerspectiveCamera camera;
 	private CameraInputController cameraInputController;
@@ -38,7 +41,9 @@ public class TCGHandGame extends ApplicationAdapter {
 	public void create() {
 		super.create();
 
-		Tween.registerAccessor(ModelInstance.class, new ModelInstanceAccessor());
+		Tween.setCombinedAttributesLimit(TWEEN_COMBINED_ATTRIBUTES_LIMIT);
+		tweenDeltaAccessor = new ModelInstanceAccessor();
+		Tween.registerAccessor(ModelInstance.class, tweenDeltaAccessor);
 		tweenManager = new TweenManager();
 
 		camera = new PerspectiveCamera(60f, 800, 600);
@@ -61,10 +66,10 @@ public class TCGHandGame extends ApplicationAdapter {
 		transitioningZone = new TransitioningZone(tweenManager);
 
 		deck = new Deck(tweenManager, transitioningZone);
+		deck.transform.translate(3f, 0f, -2f);
 		for (int i = 0; i < 60; i++) {
 			deck.addCard(cardTexture);
 		}
-		deck.transform.translate(3f, 0f, -2f);
 
 		hand = new Hand(tweenManager, transitioningZone);
 
@@ -99,6 +104,9 @@ public class TCGHandGame extends ApplicationAdapter {
 //		}
 
 		tweenManager.update(Gdx.graphics.getDeltaTime());
+		if (tweenManager.size() == 0) {
+			tweenDeltaAccessor.freeMemory();
+		}
 
 		modelBatch.begin(camera);
 		modelBatch.render(renderableObjects, environment);

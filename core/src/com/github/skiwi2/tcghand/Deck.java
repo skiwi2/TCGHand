@@ -29,7 +29,6 @@ public class Deck extends RenderableObject {
 
     public Deck(final TweenManager tweenManager, final TransitioningZone transitioningZone) {
         super(tweenManager, transitioningZone);
-        addExtraTransform(deckTransform);
     }
 
     public void addCard(final Texture texture) {
@@ -38,16 +37,15 @@ public class Deck extends RenderableObject {
             new Material(ColorAttribute.createDiffuse(color), TextureAttribute.createDiffuse(texture)),
             VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
         ModelInstance cardInstance = new ModelInstance(cardModel);
+        cardInstance.transform.translate(0f, 0f, -instances.size * CARD_DEPTH);
+        cardInstance.transform.mulLeft(deckTransform).mulLeft(transform);
         instances.add(cardInstance);
-
-        cardInstance.transform.setToTranslation(0f, 0f, -instances.size * CARD_DEPTH);
 
         usedDisposables.add(cardModel);
     }
 
     public ModelInstance drawCard() {
         ModelInstance instance = instances.removeIndex(instances.size - 1);
-        instance.transform.mulLeft(transform);
         transitioningZone.addCard(instance);
         return instance;
     }
