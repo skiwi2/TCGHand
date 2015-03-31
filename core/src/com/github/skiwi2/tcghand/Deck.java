@@ -33,8 +33,9 @@ public class Deck implements RenderableProvider, Disposable {
     private final Array<Disposable> usedDisposables = new Array<Disposable>();
 
     public void addCard(final Texture texture) {
+        Color color = (cardInstances.size % 2 == 0) ? Color.RED : Color.BLUE;
         Model cardModel = new ModelBuilder().createBox(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH,
-            new Material(ColorAttribute.createDiffuse(Color.RED), TextureAttribute.createDiffuse(texture)),
+            new Material(ColorAttribute.createDiffuse(color), TextureAttribute.createDiffuse(texture)),
             VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
         ModelInstance cardInstance = new ModelInstance(cardModel);
         cardInstances.add(cardInstance);
